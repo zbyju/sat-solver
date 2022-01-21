@@ -1,7 +1,10 @@
 package solver
-import model.instance.{Instance, WeightedInstance}
-import model.result.WeightedResult
 
-trait WeightedSolver extends Solver {
-  def solve(instance: WeightedInstance): WeightedResult
+import model.instance.WeightedInstance
+import model.result.WeightedResult
+import stats.StatsTracker
+
+trait WeightedSolver {
+  val name: String
+  def solve(instance: WeightedInstance, statsTracker: StatsTracker): WeightedResult
 }
