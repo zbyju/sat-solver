@@ -13,7 +13,7 @@ case class StatsTracker() {
 
   def getTimeNano: Long = timeEnd - timeStart
 
-  override def toString(): String = {
+  override def toString: String = {
     s"""Time: $getTimeNano""".stripMargin
   }
 }
