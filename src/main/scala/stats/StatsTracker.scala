@@ -3,6 +3,7 @@ package stats
 case class StatsTracker() {
   private var timeStart: Long = -1
   private var timeEnd: Long = _
+  private var progression: Seq[Int] = Seq()
 
   def getTimeStart: Long = timeStart
 
@@ -13,6 +14,9 @@ case class StatsTracker() {
   def setTimeEnd(): Unit = timeEnd = System.nanoTime()
 
   def getTimeNano: Long = timeEnd - timeStart
+
+  def addProgress(p: Int): Unit = progression = progression :+ p
+  def getProgression: Seq[Int] = progression
 
   override def toString: String = {
     s"""Time: $getTimeNano""".stripMargin
