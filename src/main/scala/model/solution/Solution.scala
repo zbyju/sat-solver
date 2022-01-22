@@ -1,7 +1,7 @@
 package model.solution
 
-class Solution(val id: Int, val setName: String, val sum: Int, val valuation: Seq[Boolean]) {
-  override def toString = s"Sol $setName($id) - $sum - (${valuation.map(v => if(v) 1 else 0).mkString(", ")})"
+class Solution(val id: Int, val setName: String, val sum: Int, val evaluation: Seq[Boolean]) {
+  override def toString = s"Sol $setName($id) - $sum - (${evaluation.map(v => if(v) 1 else 0).mkString(", ")})"
 }
 
 object Solution {
