@@ -1,6 +1,6 @@
 package file
 
-import model.instance.WeightedInstance
+import model.instance.Instance
 import parser.MWCFNParser
 
 type SolutionWithId = (Int, String)
@@ -24,10 +24,10 @@ class MFileLoader extends FileLoader {
   val solutionLines2078: Seq[SolutionWithId] = getInputLines(getInputFile(pathSol2078)).toSeq.map(mapToSolutionWithId).sortBy(sortSolutionLinesBy)
   val solutionLines50201: Seq[SolutionWithId] = getInputLines(getInputFile(pathSol50201)).toSeq.map(mapToSolutionWithId).sortBy(sortSolutionLinesBy)
 
-  val instances2078: Seq[WeightedInstance] = createInstances(filenames2078, solutionLines2078, name2078)
-  val instances50201: Seq[WeightedInstance] = createInstances(filenames50201, solutionLines50201, name50201)
+  val instances2078: Seq[Instance] = createInstances(filenames2078, solutionLines2078, name2078)
+  val instances50201: Seq[Instance] = createInstances(filenames50201, solutionLines50201, name50201)
 
-  def createInstances(filenames: Seq[FilenamesWithId], solutionLines: Seq[SolutionWithId], name: String): Seq[WeightedInstance] = {
+  def createInstances(filenames: Seq[FilenamesWithId], solutionLines: Seq[SolutionWithId], name: String): Seq[Instance] = {
     filenames.map(f => {
       val sol = solutionLines.find(s => s._1 == f._1)
       sol match {

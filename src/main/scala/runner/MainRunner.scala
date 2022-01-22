@@ -6,6 +6,8 @@ object MainRunner {
   val loader = new MFileLoader()
 
   def main(args: Array[String]): Unit = {
-    println(loader.instances2078)
+    println(loader.filenames2078.length)
+    println(loader.solutionLines2078.length)
+    println(loader.instances2078.length)
   }
 }

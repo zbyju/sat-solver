@@ -1,14 +1,13 @@
 package solver.simulatedannealing
 
-import model.instance.{Instance, WeightedInstance}
-import model.result.{Result, WeightedResult}
-import solver.WeightedSolver
+import model.instance.Instance
+import model.result.Result
+import solver.Solver
 import stats.StatsTracker
-import solver.simulatedannealing.Config
 
-class SimulatedAnnealingWeightedSolver(config: Config) extends WeightedSolver {
-  override val name: String = s"SA-${config.initTemperature}-${config.initEquilibrium}-${config.coolingCoefficient}"
-  override def solve(instance: WeightedInstance, statsTracker: StatsTracker): WeightedResult = {
+class SimulatedAnnealingWeightedSolver() extends Solver {
+  override val name: String = s"SA-"
+  override def solve(instance: Instance, statsTracker: StatsTracker): Result = {
     setupSolving(statsTracker)
 
     null
