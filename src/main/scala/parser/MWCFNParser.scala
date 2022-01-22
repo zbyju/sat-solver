@@ -18,7 +18,7 @@ class MWCFNParser extends Parser {
     val numberOfVars = plineSplit(2).toInt
     val numberOfClauses = plineSplit(3).toInt
 
-    val weights = wline.split(" ").drop(1).map(s => s.toInt)
+    val weights = wline.split(" ").drop(1).filter(f => f.nonEmpty && f != "0").map(s => s.toInt)
     val variables = weights.zipWithIndex.map(w => new Variable(w._2, w._1))
 
     val clauses = clauseLines.map(c => Clause.createClause(c, variables))
