@@ -1,5 +1,6 @@
 package solver.simulatedannealing
 
+import model.instance.Configuration.generateRandomConfiguration
 import model.instance.{Configuration, Instance}
 import model.result.Result
 import solver.Solver
@@ -15,7 +16,7 @@ class SASolver(config: SAConfig) extends Solver {
   override val name: String = s"SA-"
 
   def initTempWeightSum(i: Configuration, multiplier: Double = 2): Temperature = {
-    i.variables.map(v => v.weight).sum
+    i.variables.map(v => v.weight).sum * i.variables.map(v => v.weight).max
   }
 
   def initTempWeightMax(i: Configuration, multiplier: Double = 2): Temperature = {
@@ -34,28 +35,42 @@ class SASolver(config: SAConfig) extends Solver {
     T * config.coolingCoefficient
   }
 
-  def next(i: Configuration, T: Double): Configuration = {
-    val nextState = i.nextOneRandom
-    if(nextState.isBetter(i)) return nextState
+  def next(i: Configuration, instance: Instance, state: SAState): Configuration = {
+    if(state.worseStreak >= config.worseStreakRestartThreshold && Random.nextDouble() > 1 - config.restartChanceWorse) {
+      state.worseStreak = 0
+      return generateRandomConfiguration(instance)
+    }
+    if(Random.nextDouble() > 1 - config.restartChance) {
+      state.worseStreak = 0
+      return generateRandomConfiguration(instance)
+    }
+    val nextState = i.nextRandom
+    if(nextState.isBetter(i)) {
+      state.worseStreak = 0
+      return nextState
+    }
+
+    state.worseStreak += 1
     val delta = i.costDifference(nextState)
     val rnd = new Random()
-    if(rnd.nextDouble() < exp(-delta / T)) {
+    if(rnd.nextDouble() < exp(-delta / state.temperature)) {
       return nextState
     }
     i
   }
 
   override def solve(instance: Instance, statsTracker: StatsTracker): Result = {
-    var state: SAState = setupSolving(instance, statsTracker)
+    val state: SAState = setupSolving(instance, statsTracker)
     while(!frozenStatic(state.temperature)) {
-      state = state.changeEqui(config.defaultEqui)
+      state.equi = config.defaultEqui
       while(!equilibrium(state.equi)) {
-        state = state.changeConfiguration(next(state.c, state.temperature))
+        state.c = next(state.c, instance, state)
+        statsTracker.addVisited(state.c.evaluation)
         statsTracker.addProgress(state.c.cost)
-        if(state.c.isBetter(state.best)) state = state.changeBest(state.c)
-        state = state.changeEqui(state.equi - 1)
+        if(state.c.isBest(state.best)) state.best = Some(state.c)
+        state.equi -= 1
       }
-      state = state.changeTemperature(cool(state.temperature))
+      state.temperature = cool(state.temperature)
     }
 
     // Return result
