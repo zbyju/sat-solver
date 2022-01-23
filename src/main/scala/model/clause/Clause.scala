@@ -7,12 +7,12 @@ import io.AnsiColor._
 
 class Clause(val variableIndices: Seq[Int],
              val negations: Seq[Boolean]) {
-  def variables(variables: Seq[Variable]): Seq[Variable] = variableIndices.map(i => variables.find(v => v.index == i).get)
+  def variables(vars: Seq[Variable]): Seq[Variable] = variableIndices.map(i => vars.find(v => v.index == i).get)
   def values(vars: Seq[Variable]): Seq[Bool] = variables(vars).zip(negations).map(v => if(v._2) !v._1.value else v._1.value)
   def value(vars: Seq[Variable]): Bool = values(vars).exists(v => v.value)
   def isTrue(vars: Seq[Variable]): Boolean = value(vars).value
   def sumWeight(vars: Seq[Variable]): Int = variables(vars).filter(v => v.value).map(v => v.weight).sum
-
+  def badVariables(vars: Seq[Variable]): Seq[Int] = values(vars).zipWithIndex.filter(v => !v._1).map(v => variableIndices(v._2))
 
   override def toString = variableIndices.zip(negations).map(f=>if(f._2) "!"+f._1 else f._1).mkString(s"${YELLOW}C${RESET}(", "+", ")")
 }
