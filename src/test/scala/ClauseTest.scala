@@ -1,3 +1,0 @@
-class ClauseTest extends FunSuite {
-
-}
