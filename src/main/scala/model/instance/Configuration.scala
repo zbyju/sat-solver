@@ -16,12 +16,14 @@ class Configuration(val variables: Seq[Variable],
   lazy val evaluation: Seq[Boolean] = variables.map(v => v.value)
   lazy val falseClauses: Seq[Clause] = clauses.filter(c => !c.isTrue(variables))
 
-  lazy val cost: Int = {
-    sumWeight
-  }
+  lazy val cost: Double = sumWeight.toDouble
 
-  lazy val cost2: Int = {
-    if(isTrue) sumWeight else sumWeight - maxWeight
+  lazy val cost2: Double = if(isTrue) sumWeight else sumWeight - maxWeight
+
+  lazy val cost3: Double = if(isTrue) sumWeight else sumWeight / 20
+
+  lazy val cost4: Double = {
+    (clauses.length - falseClauses.length).toDouble / clauses.length + (sumWeight.toDouble / maxWeight)
   }
 
   def isBest(best: Option[Configuration]): Boolean = best match {
@@ -34,7 +36,7 @@ class Configuration(val variables: Seq[Variable],
   }
 
   def isBetter(other: Configuration): Boolean = {
-    cost2 > other.cost2
+    cost4 > other.cost4
   }
 
   def isBetter(other: Option[Configuration]): Boolean = other match {
@@ -42,7 +44,7 @@ class Configuration(val variables: Seq[Variable],
     case None => true
   }
 
-  def costDifference(other: Configuration): Int = Math.abs(cost - other.cost)
+  def costDifference(other: Configuration): Double = Math.abs(cost4 - other.cost4)
 
   lazy val nextOneRandom: Configuration = {
     val rnd = new Random()
@@ -50,11 +52,20 @@ class Configuration(val variables: Seq[Variable],
     new Configuration(variables.updated(randomIndex, !variables(randomIndex)), clauses)
   }
 
+  def nextFractionRandom(fraction: Int = 3): Configuration = {
+    val randomIndices = Seq.fill(scala.math.max(variables.length / fraction, 3))(Random.nextInt(variables.length))
+    new Configuration(variables.map(v => if(randomIndices.contains(v.index)) !v else v), clauses)
+  }
+
+  def nextNRandom(n: Int = 2): Configuration = {
+    val randomIndices = Seq.fill(n)(Random.nextInt(variables.length))
+    new Configuration(variables.map(v => if(randomIndices.contains(v.index)) !v else v), clauses)
+  }
+
   lazy val nextRandom: Configuration = {
     val rnd = new Random()
     if(isTrue) {
-      val randomIndices = Seq.fill(variables.length / 4)(rnd.nextInt(variables.length))
-      new Configuration(variables.map(v => if(randomIndices.contains(v.index)) !v else v), clauses)
+      nextNRandom(1)
     } else {
       val badVars = falseClauses.flatMap(c => c.badVariables(variables))
       val randomIndex = rnd.nextInt(badVars.length)
