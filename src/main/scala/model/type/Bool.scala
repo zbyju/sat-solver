@@ -9,7 +9,19 @@ class Bool(val value: Boolean) {
   def +(other: Bool): Bool = this.value || other.value
   def *(other: Bool): Bool = this.value && other.value
 
+
   override def toString = s"Bool($value)"
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Bool => that.value == this.value
+    case that: Boolean => that == this.value
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    val state = Seq(value)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 object Bool {
