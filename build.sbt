@@ -6,3 +6,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "SAT-solver"
   )
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
