@@ -17,5 +17,14 @@ class Instance(val id: Int, val setName: String,
 }
 
 object Instance {
-  def createConfiguration(i: Instance): Configuration = new Configuration(i.variables, i.clauses)
+  def normalizeWeight(w: Int, min: Int, max: Int): Double = (w - min).toDouble / (max - min)
+  def createConfiguration(i: Instance): Configuration = {
+    val minWeight = i.variables.map(v => v.weight).min
+    val maxWeight = i.variables.map(v => v.weight).max
+    new Configuration(i.variables.map(v => {
+      new Variable(v.index,
+        (normalizeWeight(v.weight, minWeight, maxWeight) * 1000).toInt
+      )
+    }), i.clauses)
+  }
 }
