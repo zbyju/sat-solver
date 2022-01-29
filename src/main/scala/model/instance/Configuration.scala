@@ -65,7 +65,7 @@ class Configuration(val variables: Seq[Variable],
   lazy val nextRandom: Configuration = {
     val rnd = new Random()
     if(isTrue) {
-      nextNRandom(1)
+      nextOneRandom
     } else {
       val badVars = falseClauses.flatMap(c => c.badVariables(variables))
       val randomIndex = rnd.nextInt(badVars.length)
