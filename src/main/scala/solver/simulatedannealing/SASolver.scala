@@ -38,9 +38,8 @@ class SASolver(config: SAConfig) extends Solver {
 
   def findInitTemperature(c: Configuration): Temperature = {
     var temp = config.frozenThreshold + 1
-
-    while(true) {
-      val nexts = Seq.fill(20)(c.nextRandom)
+    while(temp < c.maxWeight) {
+      val nexts = Seq.fill(c.variables.length * 2)(c.nextRandom).filter(n => !n.isBetter(c))
       val avgChance = nexts.map(n => exp(-calculateDelta(n, c) / temp)).sum / nexts.length
       if(avgChance > config.initProbability) return temp
       else temp *= 1.5
@@ -51,7 +50,7 @@ class SASolver(config: SAConfig) extends Solver {
   def calculateDelta(c: Configuration, next: Configuration): Double = next.costDifference(c)
 
   def next(i: Configuration, instance: Instance, state: SAState): Configuration = {
-    val nextState = i.nextOneRandom
+    val nextState = i.nextRandom
     if(nextState.isBetter(i)) {
       state.worseStreak = 0
       state.tailStreak = 0
@@ -61,35 +60,28 @@ class SASolver(config: SAConfig) extends Solver {
     val delta = calculateDelta(nextState, i)
     val rnd = new Random()
     val chance = exp(-delta / state.temperature)
-//    println(chance)
 
     if(rnd.nextDouble() < chance) {
       state.tailStreak = 0
-
-      if(Random.nextDouble() > 1 - config.restartChance) {
-        return generateRandomConfiguration(instance)
-      }
-//      println("worse")
       return nextState
     }
 
     state.tailStreak += 1
     state.worseStreak += 1
 
+    if(Random.nextDouble() > 1 - config.restartChance) {
+      return generateRandomConfiguration(instance)
+    }
+
     if(state.worseStreak >= config.worseStreakRestartThreshold &&
       Random.nextDouble() > 1 - config.restartChanceWorse) {
       state.worseStreak = 0
       return generateRandomConfiguration(instance)
     }
-//    state.best match {
-//      case Some(b) => return b
-//      case None => return i
-//    }
     i
   }
 
   override def solve(instance: Instance, statsTracker: StatsTracker): Result = {
-    var tmp = 0
     val state: SAState = setupSolving(instance, statsTracker)
     while(!frozenStatic(state.temperature) && state.tailStreak < config.tailCutThreshold) {
       state.equi = config.defaultEqui
@@ -98,13 +90,11 @@ class SASolver(config: SAConfig) extends Solver {
         statsTracker.addVisited(state.c.evaluation)
         statsTracker.addProgress(state.c.cost)
         statsTracker.addProgressCost(state.c.cost4)
-        tmp += 1
         if(state.c.isBest(state.best)) state.best = Some(state.c)
         state.equi -= 1
       }
       state.temperature = cool(state.temperature)
     }
-//    println(tmp)
     state.best match {
       case Some(value) => {
         Result(instance.id, instance.setName, value.sumWeight, value.isTrue, value.evaluation, Some(instance.solution), statsTracker)
