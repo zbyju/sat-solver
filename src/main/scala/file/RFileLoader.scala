@@ -3,18 +3,18 @@ package file
 import model.instance.Instance
 import parser.MWCFNParser
 
-class MFileLoader extends FileLoader {
-  override val name = "M"
+class RFileLoader extends FileLoader {
+  override val name = "R"
   val parser = new MWCFNParser()
 
-  override val name1 = "M-20-78"
-  override val name2 = "M-50-201"
+  override val name1 = "R-20-78"
+  override val name2 = "R-50-201"
 
-  val path2078 = "/wuf20-78-M/"
-  val path50201 = "/wuf50-201-M/"
+  val path2078 = "/wuf20-78-R/"
+  val path50201 = "/wuf50-201-R/"
 
-  val pathSol2078 = "/optimal/wuf20-78-M-opt.dat"
-  val pathSol50201 = "/optimal/wuf50-201-M-opt.dat"
+  val pathSol2078 = "/optimal/wuf20-78-R-opt.dat"
+  val pathSol50201 = "/optimal/wuf50-201-R-opt.dat"
 
   val filenames2078: Seq[FilenamesWithId] = getListOfFiles(path2078).map(mapToFilenameWithId).sortBy(sortFilenamesBy)
   val filenames50201: Seq[FilenamesWithId] = getListOfFiles(path50201).map(mapToFilenameWithId).sortBy(sortFilenamesBy)
