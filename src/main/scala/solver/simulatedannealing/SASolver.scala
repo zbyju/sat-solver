@@ -13,7 +13,7 @@ type Temperature = Double
 type Best = Option[Configuration]
 
 class SASolver(config: SAConfig) extends Solver {
-  val postfixName: String = "nextOneRandom"
+  val postfixName: String = ""
   override val name: String = s"SA-${config.coolingCoefficient}-${config.defaultEqui}-${config.frozenThreshold}-${config.restartChance}-${config.restartChanceWorse}-${config.initProbability}-${config.tailCutThreshold}-$postfixName"
 
   def initTempWeightSum(i: Configuration, multiplier: Double = 2): Temperature = {
@@ -84,17 +84,18 @@ class SASolver(config: SAConfig) extends Solver {
   override def solve(instance: Instance, statsTracker: StatsTracker): Result = {
     val state: SAState = setupSolving(instance, statsTracker)
     while(!frozenStatic(state.temperature) && state.tailStreak < config.tailCutThreshold) {
-      state.equi = config.defaultEqui
+      state.equi = (instance.variables.length * config.defaultEqui).toInt
       while(!equilibrium(state.equi)) {
         state.c = next(state.c, instance, state)
-        statsTracker.addVisited(state.c.evaluation)
-        statsTracker.addProgress(state.c.cost)
-        statsTracker.addProgressCost(state.c.cost4)
+//        statsTracker.addVisited(state.c.evaluation)
+//        statsTracker.addProgressBest(state.best)
+//        statsTracker.addProgressCost(state.c.cost)
         if(state.c.isBest(state.best)) state.best = Some(state.c)
         state.equi -= 1
       }
       state.temperature = cool(state.temperature)
     }
+//    println(s"${!frozenStatic(state.temperature)} vs ${(state.tailStreak < config.tailCutThreshold)}")
     state.best match {
       case Some(value) => {
         Result(instance.id, instance.setName, value.sumWeight, value.isTrue, value.evaluation, Some(instance.solution), statsTracker)
@@ -106,7 +107,7 @@ class SASolver(config: SAConfig) extends Solver {
   def setupSolving(instance: Instance, statsTracker: StatsTracker): SAState = {
     statsTracker.setTimeStart()
     val configuration = Configuration.generateRandomConfiguration(instance)
-    SAState(configuration, findInitTemperature(configuration), None, config.defaultEqui)
+    SAState(configuration, findInitTemperature(configuration), None, (instance.variables.length * config.defaultEqui).toInt)
   }
 
 }
